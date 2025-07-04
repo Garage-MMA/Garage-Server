@@ -1,5 +1,4 @@
-const mongoose = require("mongoose")
-
+import mongoose from "mongoose";
 const GarageSchema = new mongoose.Schema(
   {
     _id: { type: String, required: true },
@@ -17,4 +16,4 @@ const GarageSchema = new mongoose.Schema(
 )
 
 const Garage = mongoose.model("Garage", GarageSchema)
-module.exports = Garage
+export default Garage

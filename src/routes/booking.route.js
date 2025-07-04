@@ -1,18 +1,24 @@
 import express from "express";
-const bookingController = require("../controllers/booking.controller");
-const { verifyToken } = require("../middleware/auth.middleware");
+import {
+  getAllBookings,
+  getAllBookingsOfUser,
+  createBooking,
+  updateBooking,
+} from "../controllers/booking.controller.js";
+import { verifyToken, verifyRole } from "../middleware/auth.middleware.js";
 
-const bookingRouter = express.Router()
-// Get all bookings (admin)
-bookingRouter.get("/", verifyToken, bookingController.getAllBookings);
+const bookingRouter = express.Router();
 
-// Get current user's bookings (customer)
-bookingRouter.get("/my", verifyToken, bookingController.getAllBookingsOfUser);
+// Admin or garage owner
+bookingRouter.get("/", verifyToken, verifyRole(["admin", "garage_owner"]), getAllBookings);
 
-// Create new booking
-bookingRouter.post("/", verifyToken, bookingController.createBooking);
+// Logged-in customer
+bookingRouter.get("/my", verifyToken, verifyRole(["customer"]), getAllBookingsOfUser);
 
-// Update booking
-bookingRouter.put("/:id", verifyToken, bookingController.updateBooking);
+// Customer creates booking
+bookingRouter.post("/", verifyToken, verifyRole(["customer"]), createBooking);
+
+// Update booking status/cancel reason 
+bookingRouter.put("/:id", verifyToken, updateBooking);
 
 export default bookingRouter;
