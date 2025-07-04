@@ -1,4 +1,4 @@
-const mongoose = require("mongoose")
+import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(
   {
@@ -9,7 +9,7 @@ const UserSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ["customer", "garage_owner", "admin"],
-      required: true
+      required: true,
     },
     vehicles: [
       {
@@ -17,12 +17,14 @@ const UserSchema = new mongoose.Schema(
         brand: String,
         model: String,
         year: Number,
-        color: String 
-      }
+        color: String,
+      },
     ],
-    isActive: { type: Boolean, default: true } 
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
-)
+);
 
-module.exports = mongoose.model("User", UserSchema, "users")
+const User = mongoose.model("User", UserSchema, "users");
+
+export default User;

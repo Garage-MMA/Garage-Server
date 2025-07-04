@@ -1,6 +1,6 @@
-const bcrypt = require("bcryptjs")
-const jwt = require("jsonwebtoken")
-const User = require("../models/users.model")
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import User from "../models/users.model.js"; 
 
 const register = async (req, res) => {
   try {
@@ -101,4 +101,4 @@ const login = async (req, res) => {
 
 
 
-module.exports = { register, login }
+export default {register, login}

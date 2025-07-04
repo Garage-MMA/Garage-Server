@@ -1,6 +1,7 @@
 {
   "name": "be",
   "version": "1.0.0",
+  "type": "module", 
   "main": "server.js",
   "scripts": {
     "start": "nodemon server"
