@@ -1,9 +1,7 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const app = express();
-const cors = require('cors');
-const connectDB = require('./src/config/mongodb');
-const mainRouter = require('./src/routes/mainRoutes'); 
+import express from "express";
+import bodyParser from "body-parser";
+import cors from "cors";
+import mainRouter from "./src/routes/main.route.js"; // Nhớ thêm .js ở cuối
 require('dotenv').config();
 
 app.use(cors());
