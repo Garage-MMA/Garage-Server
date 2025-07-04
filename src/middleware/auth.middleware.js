@@ -17,7 +17,7 @@ export const verifyToken = (req, res, next) => {
   }
 };
 
-export const verifyRole = (requiredRole) => {
+export const verifyRole = (allowedRoles) => {
   return (req, res, next) => {
     const user = req.user;
 
@@ -25,10 +25,8 @@ export const verifyRole = (requiredRole) => {
       return res.status(403).json({ message: "Role not found in token" });
     }
 
-    if (user.role !== requiredRole) {
-      return res
-        .status(403)
-        .json({ message: `Access denied: ${requiredRole} only` });
+    if (!allowedRoles.includes(user.role)) {
+      return res.status(403).json({ message: "Access denied: customer only" });
     }
 
     next();
