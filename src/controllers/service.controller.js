@@ -33,7 +33,7 @@ const serviceController = {
     try {
       const { category } = req.params;
 
-      // Validate category
+      
       if (!["Sửa chữa", "Bảo dưỡng"].includes(category)) {
         return res.status(400).json({ message: "Danh mục phải là 'Sửa chữa' hoặc 'Bảo dưỡng'" });
       }
@@ -113,27 +113,20 @@ const serviceController = {
   ],
 
   deleteService: async (req, res) => {
-    try {
-      const { id } = req.params;
+     try {
+    const { id } = req.params
 
-      if (!mongoose.isValidObjectId(id)) {
-        return res.status(400).json({ message: "ID dịch vụ không hợp lệ" });
-      }
+    const deletedService = await Service.findByIdAndDelete(id)
 
-      const deletedService = await Service.findByIdAndDelete(id).lean();
-
-      if (!deletedService) {
-        return res.status(404).json({ message: "Không tìm thấy dịch vụ" });
-      }
-
-      res.status(200).json({
-        message: "Xóa dịch vụ thành công",
-        data: deletedService,
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Lỗi khi xóa dịch vụ", error: error.message });
+    if (!deletedService) {
+      return res.status(404).json({ message: "Không tìm thấy dịch vụ để xóa" })
     }
-  },
+
+    res.status(200).json({ message: "Xóa dịch vụ thành công" })
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi khi xóa dịch vụ", error })
+  }
+}
 };
 
 export default serviceController
