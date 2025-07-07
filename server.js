@@ -4,7 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import mainRouter from "./src/routes/main.route.js";
-import connectDB from "./src/config/mongodb.js"; 
+import connectDB from "./src/config/mongodb.js";
 
 dotenv.config();
 
