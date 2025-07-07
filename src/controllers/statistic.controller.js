@@ -4,7 +4,7 @@ const statisticController = {
   getDailyStatistic: async (req, res) => {
     try {
       const { garageId } = req.params;
-      const { date } = req.query || new Date().toISOString().split("T")[0]; // Default to 2025-07-07
+      const { date } = req.query || new Date().toISOString().split("T")[0]; 
       const [year, month, day] = date.split("-").map(Number);
       const start = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
       const end = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
