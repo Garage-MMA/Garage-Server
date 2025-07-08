@@ -1,4 +1,12 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+
+const vehicleSchema = new mongoose.Schema({
+  licensePlate: { type: String, required: true },
+  brand: { type: String },
+  model: { type: String },
+  year: { type: Number },
+  color: { type: String }
+});
 
 const UserSchema = new mongoose.Schema(
   {
@@ -8,23 +16,15 @@ const UserSchema = new mongoose.Schema(
     password: { type: String, required: true },
     role: {
       type: String,
-      enum: ["customer", "garage_owner", "admin"],
+      enum: ['customer', 'garage_owner', 'admin'],
       required: true,
     },
-    vehicles: [
-      {
-        licensePlate: { type: String, required: true },
-        brand: String,
-        model: String,
-        year: Number,
-        color: String,
-      },
-    ],
+    vehicles: [vehicleSchema],
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-const User = mongoose.model("User", UserSchema, "users");
+const User = mongoose.model('User', UserSchema, 'users');
 
 export default User;
