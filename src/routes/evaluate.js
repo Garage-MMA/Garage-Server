@@ -1,9 +1,10 @@
-const express = require("express");
-const router = express.Router();
-const evaluateController = require("../controllers/evaluateController");
-const { check } = require("express-validator");
+import express from "express";
+import { check } from "express-validator";
+import { createEvaluate, getAllEvaluates } from "../controllers/evaluateController.js";
 
-// Tạo đánh giá mới với validate
+const router = express.Router();
+
+// 📌 Create new evaluation with validation
 router.post(
     "/",
     [
@@ -14,12 +15,12 @@ router.post(
             .optional()
             .isString()
             .isLength({ max: 300 })
-            .withMessage("Comment must not exceed 300 characters")
+            .withMessage("Comment must not exceed 300 characters"),
     ],
-    evaluateController.createEvaluate
+    createEvaluate
 );
 
-// Lấy danh sách đánh giá (có phân trang)
-router.get("/", evaluateController.getAllEvaluates);
+// 📌 Get all evaluations with pagination
+router.get("/", getAllEvaluates);
 
-module.exports = router;
+export default router;

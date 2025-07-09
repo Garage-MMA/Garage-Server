@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+
 const { Schema } = mongoose;
 
 const TimeSlotSchema = new Schema({
@@ -35,4 +36,5 @@ const ScheduleSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Schedule", ScheduleSchema);
+const Schedule = mongoose.model("Schedule", ScheduleSchema);
+export default Schedule;

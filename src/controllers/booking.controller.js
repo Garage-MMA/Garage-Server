@@ -125,24 +125,53 @@ const createBooking = async (req, res) => {
 // Update booking status or cancel reason
 const updateBooking = async (req, res) => {
     try {
-    const { id } = req.params
-    const { status, cancelReason } = req.body
-    const updateData = { status }
-    if (status === "Cancelled" && cancelReason) {
-      updateData.cancelReason = cancelReason
+        const { id } = req.params
+        const { status, cancelReason } = req.body
+        const updateData = { status }
+        if (status === "Cancelled" && cancelReason) {
+            updateData.cancelReason = cancelReason
+        }
+        const updatedBooking = await Booking.findByIdAndUpdate(id, updateData, {
+            new: true
+        })
+        if (!updatedBooking) {
+            return res.status(404).json({ message: "Can not find booking" })
+        }
+        res.status(200).json(updatedBooking)
+    } catch (error) {
+        console.error("Error updating booking:", error)
+        res.status(500).json({ message: "Error when update booking", error })
     }
-    const updatedBooking = await Booking.findByIdAndUpdate(id, updateData, {
-      new: true
-    })
-    if (!updatedBooking) {
-      return res.status(404).json({ message: "Can not find booking" })
-    }
-    res.status(200).json(updatedBooking)
-  } catch (error) {
-    console.error("Error updating booking:", error)
-    res.status(500).json({ message: "Error when update booking", error })
-  }
 };
+// Trả về danh sách ngày và khung giờ đã đặt của customer hiện tại
+const getBookingDatesOfCustomer = async (req, res) => {
+    try {
+        const customerId = req.user?.userId;
+
+        if (!customerId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const bookings = await Booking.find(
+            {
+                customerId,
+                status: { $ne: "Cancelled" } // Chỉ lấy những booking chưa bị huỷ
+            },
+            "bookingDate" // Chỉ lấy trường bookingDate
+        ).lean();
+
+        // Dữ liệu trả về dạng:
+        // [{ bookingDate: { date: '2025-10-19', timeSlot: '16:00-17:00' } }, ...]
+
+        const bookingDates = bookings.map((b) => b.bookingDate);
+
+        res.status(200).json({ bookingDates });
+    } catch (error) {
+        console.error("Lỗi khi lấy lịch booking:", error);
+        res.status(500).json({ message: "Lỗi server", error });
+    }
+};
+
 
 
 export {
@@ -150,4 +179,5 @@ export {
     getAllBookingsOfUser,
     createBooking,
     updateBooking,
+    getBookingDatesOfCustomer,
 };

@@ -1,30 +1,33 @@
-const Schedule = require("~/models/Schedule")
-const mongoose = require("mongoose")
+import Schedule from "../models/Schedule.js";
+
+import mongoose from "mongoose";
+
+
 // 📌 Lấy lịch theo garageId và ngày (hiển thị slot trống và đã đặt)
-exports.getScheduleByGarage = async (req, res) => {
+export async function getScheduleByGarage(req, res) {
   try {
     const { garageId } = req.params
     const { date } = req.query // Ngày cần lấy lịch
 
     if (!date) {
-      return res.status(400).json({ message: "Vui lòng cung cấp ngày" })
+      return res.status(400).json({ message: "Please provide a date" })
     }
 
     const schedule = await Schedule.findOne({ garageId, date }).populate("timeSlots.bookingId")
 
     if (!schedule) {
-      return res.status(404).json({ message: "Không tìm thấy lịch" })
+      return res.status(404).json({ message: "Schedule not found" })
     }
 
     res.status(200).json(schedule)
   } catch (error) {
-    res.status(500).json({ message: "Lỗi khi lấy lịch", error })
+    res.status(500).json({ message: "Error fetching schedule", error })
   }
 }
 
 // 📌 Cập nhật trạng thái của slot khi đặt lịch hoặc hủy lịch
 
-exports.updateScheduleSlot = async (req, res) => {
+export async function updateSchedulesSlot(req, res) {
   try {
     const { garageId } = req.params
     const { date, slot, status, bookingId } = req.body
@@ -34,14 +37,14 @@ exports.updateScheduleSlot = async (req, res) => {
     const schedule = await Schedule.findOne({ garageId, date })
 
     if (!schedule) {
-      return res.status(404).json({ message: "Không tìm thấy lịch" })
+      return res.status(404).json({ message: "Schedule not found" })
     }
 
     const slotIndex = schedule.timeSlots.findIndex((s) => s.slot === slot)
     console.log("Slot index:", slotIndex)
 
     if (slotIndex === -1) {
-      return res.status(400).json({ message: "Không tìm thấy slot này" })
+      return res.status(400).json({ message: "Slot not found" })
     }
 
     console.log("Before update:", schedule.timeSlots[slotIndex])
@@ -57,10 +60,10 @@ exports.updateScheduleSlot = async (req, res) => {
     await schedule.save()
     console.log("Schedule saved successfully")
 
-    res.status(200).json({ message: "Cập nhật lịch thành công", schedule })
+    res.status(200).json({ message: "Schedule updated successfully", schedule })
   } catch (error) {
     console.error("Error updating schedule:", error)
-    res.status(500).json({ message: "Lỗi khi cập nhật lịch", error })
+    res.status(500).json({ message: "Error updating schedule", error })
   }
 }
 
