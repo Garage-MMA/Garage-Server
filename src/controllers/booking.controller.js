@@ -189,7 +189,15 @@ const getBookingDatesOfCustomer = async (req, res) => {
 
 const getConfirmedBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find({ status: "Confirmed" })
+    const customerId = req.user?.userId;
+    if (!customerId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const bookings = await Booking.find({
+        status: "Confirmed",
+        customerId: customerId
+      })
       .populate("customerId", "fullName email phone")
       .populate("garageId", "name address phone")
       .lean();
@@ -203,14 +211,22 @@ const getConfirmedBookings = async (req, res) => {
 
 const getLatestConfirmedBooking = async (req, res) => {
   try {
-    const booking = await Booking.findOne({ status: "Confirmed" })
+    const customerId = req.user?.userId;
+    if (!customerId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const booking = await Booking.findOne({
+        status: "Confirmed",
+        customerId: customerId
+      })
       .sort({ updatedAt: -1 })
       .populate("customerId", "fullName email phone")
       .populate("garageId", "name address phone")
       .lean();
 
     if (!booking) {
-      return res.status(404).json({ message: "Không tìm thấy booking nào đã xác nhận" });
+      return res.status(404).json({ message: "Không tìm thấy booking nào đã xác nhận cho khách hàng này" });
     }
 
     res.status(200).json({ booking });

@@ -29,10 +29,10 @@ bookingRouter.put("/:id", verifyToken, updateBooking);
 
 
 // Get all booking confirmed
-bookingRouter.get("/confirmed", getConfirmedBookings);
+bookingRouter.get("/confirmed", verifyToken, getConfirmedBookings);
 
 // Get latest booking confirmed\
-bookingRouter.get("/confirmed/latest", getLatestConfirmedBooking);
+bookingRouter.get("/confirmed/latest",verifyToken, getLatestConfirmedBooking);
 
 bookingRouter.patch("/:id/cancel", verifyToken, cancelBooking);
 export default bookingRouter;
