@@ -30,7 +30,7 @@ const getAllBookingsOfUser = async (req, res) => {
             .populate("garageId", "name address phone")
             .lean();
 
-        res.status(200).json(bookings);
+        res.status(200).json({ bookings });
     } catch (error) {
         res.status(500).json({ message: "Failed to fetch user bookings", error });
     }
