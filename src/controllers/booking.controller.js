@@ -39,7 +39,7 @@ const getAllBookingsOfUser = async (req, res) => {
 // Create a new booking (customer only)
 const createBooking = async (req, res) => {
     try {
-        const { service, bookingDate, garageId } = req.body;
+        const { service, bookingDate, garageId, vehicleId } = req.body; 
         const user = req.user;
 
         if (!user || user.role !== "customer") {
@@ -48,6 +48,7 @@ const createBooking = async (req, res) => {
 
         if (
             !garageId ||
+            !vehicleId || 
             !service ||
             !Array.isArray(service) ||
             !bookingDate ||
@@ -60,6 +61,9 @@ const createBooking = async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(garageId)) {
             return res.status(400).json({ message: "Invalid garage ID" });
         }
+        if (!mongoose.Types.ObjectId.isValid(vehicleId)) {
+            return res.status(400).json({ message: "Invalid vehicle ID" });
+        }
 
         const garage = await Garage.findById(garageId).lean();
         if (!garage) {
@@ -71,11 +75,25 @@ const createBooking = async (req, res) => {
             return res.status(404).json({ message: "Customer not found" });
         }
 
+        // Kiểm tra vehicle thuộc customer
+        const vehicle = customerInfo.vehicles?.find(v => v._id.toString() === vehicleId);
+        if (!vehicle) {
+            return res.status(404).json({ message: "Vehicle not found" });
+        }
+
         const newBooking = new Booking({
             customerId: customerInfo._id,
             customerName: customerInfo.fullName,
             customerPhone: customerInfo.phone,
             customerEmail: customerInfo.email,
+            vehicleId: vehicle._id, 
+            vehicleInfo: {
+                licensePlate: vehicle.licensePlate,
+                brand: vehicle.brand,
+                model: vehicle.model,
+                color: vehicle.color,
+                year: vehicle.year,
+            },
             service,
             bookingDate: {
                 date: bookingDate.date,
@@ -97,6 +115,7 @@ const createBooking = async (req, res) => {
                     email: customerInfo.email,
                     phone: customerInfo.phone,
                 },
+                vehicle: newBooking.vehicleInfo,
                 service: newBooking.service,
                 bookingDate: newBooking.bookingDate,
                 status: newBooking.status,
