@@ -4,7 +4,8 @@ import {
   getAllBookingsOfUser,
   createBooking,
   updateBooking,
-  getBookingDatesOfCustomer
+  getBookingDatesOfCustomer,
+  cancelBooking,
 } from "../controllers/booking.controller.js";
 import { verifyToken, verifyRole } from "../middleware/auth.middleware.js";
 
@@ -23,4 +24,5 @@ bookingRouter.post("/", verifyToken, verifyRole(["customer"]), createBooking);
 // Update booking status/cancel reason 
 bookingRouter.put("/:id", verifyToken, updateBooking);
 
+bookingRouter.patch("/:id/cancel", verifyToken, cancelBooking);
 export default bookingRouter;

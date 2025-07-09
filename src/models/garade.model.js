@@ -17,5 +17,5 @@ const GarageSchema = new mongoose.Schema(
 )
 GarageSchema.index({ location: "2dsphere" });
 
-const Garage = mongoose.models.Garage || mongoose.model("Garage", GarageSchema, "Exe.garages");
+const Garage = mongoose.models.Garage || mongoose.model("Garage", GarageSchema);
 export default Garage
