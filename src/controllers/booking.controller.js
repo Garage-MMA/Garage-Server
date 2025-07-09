@@ -71,14 +71,11 @@ const createBooking = async (req, res) => {
             return res.status(404).json({ message: "Customer not found" });
         }
 
-<<<<<<< Updated upstream
-=======
         const vehicle = customerInfo.vehicles?.find(v => v._id.toString() === vehicleId);
         if (!vehicle) {
             return res.status(404).json({ message: "Vehicle not found" });
         }
 
->>>>>>> Stashed changes
         const newBooking = new Booking({
             customerId: customerInfo._id,
             customerName: customerInfo.fullName,
