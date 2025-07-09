@@ -6,7 +6,8 @@ import {
   updateBooking,
   getBookingDatesOfCustomer,
   getConfirmedBookings,
-  getLatestConfirmedBooking
+  getLatestConfirmedBooking,
+  cancelBooking,
 } from "../controllers/booking.controller.js";
 import { verifyToken, verifyRole } from "../middleware/auth.middleware.js";
 
@@ -31,4 +32,5 @@ bookingRouter.get("/confirmed", getConfirmedBookings);
 // Get latest booking confirmed\
 bookingRouter.get("/confirmed/latest", getLatestConfirmedBooking);
 
+bookingRouter.patch("/:id/cancel", verifyToken, cancelBooking);
 export default bookingRouter;

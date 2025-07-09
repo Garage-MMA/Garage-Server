@@ -187,6 +187,7 @@ const getBookingDatesOfCustomer = async (req, res) => {
     }
 };
 
+
 const getConfirmedBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ status: "Confirmed" })
@@ -220,6 +221,46 @@ const getLatestConfirmedBooking = async (req, res) => {
   }
 };
 
+const cancelBooking = async (req, res) => {
+  const { id } = req.params;
+  const { cancelReason } = req.body;
+
+
+  if (!cancelReason) {
+    return res.status(400).json({ message: 'Cancel reason is required' });
+  }
+
+  try {
+    const booking = await Booking.findById(id);
+
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    if (booking.status !== 'Pending') {
+      return res.status(400).json({
+        message: 'Only bookings with status Pending can be cancelled',
+      });
+    }
+
+    const updateData = {
+      status: 'Cancelled',
+      cancelReason,
+    };
+
+    const updatedBooking = await Booking.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
+
+    res.status(200).json({
+      message: 'Booking cancelled successfully',
+      booking: updatedBooking,
+    });
+  } catch (error) {
+    console.error('Cancel booking error:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
 
 export {
     getAllBookings,
@@ -228,5 +269,6 @@ export {
     updateBooking,
     getBookingDatesOfCustomer,
     getConfirmedBookings,
-    getLatestConfirmedBooking
+    getLatestConfirmedBooking,
+    cancelBooking,
 };
