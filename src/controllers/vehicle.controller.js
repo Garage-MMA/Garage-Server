@@ -79,7 +79,8 @@ const addVehicle = async (req, res) => {
       return res.status(400).json({ message: "Model is required" });
     }
 
-    if (!year || typeof year !== 'number' || year < 1900 || year > new Date().getFullYear() + 1) {
+    let yearNum = Number(year);
+    if (!yearNum || typeof yearNum !== 'number' || isNaN(yearNum) || yearNum < 1900 || yearNum > new Date().getFullYear() + 1) {
       return res.status(400).json({ message: "Year must be a valid number between 1900 and next year" });
     }
 
