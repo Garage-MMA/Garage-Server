@@ -174,14 +174,10 @@ const getBookingDatesOfCustomer = async (req, res) => {
         const bookings = await Booking.find(
             {
                 customerId,
-                status: { $ne: "Cancelled" } // Chỉ lấy những booking chưa bị huỷ
+                status: { $ne: "Cancelled" } 
             },
-            "bookingDate" // Chỉ lấy trường bookingDate
+            "bookingDate"
         ).lean();
-
-        // Dữ liệu trả về dạng:
-        // [{ bookingDate: { date: '2025-10-19', timeSlot: '16:00-17:00' } }, ...]
-
         const bookingDates = bookings.map((b) => b.bookingDate);
 
         res.status(200).json({ bookingDates });
@@ -189,6 +185,39 @@ const getBookingDatesOfCustomer = async (req, res) => {
         console.error("Lỗi khi lấy lịch booking:", error);
         res.status(500).json({ message: "Lỗi server", error });
     }
+};
+
+const getConfirmedBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find({ status: "Confirmed" })
+      .populate("customerId", "fullName email phone")
+      .populate("garageId", "name address phone")
+      .lean();
+
+    res.status(200).json({ bookings });
+  } catch (error) {
+    console.error("Lỗi khi lấy các booking đã xác nhận:", error);
+    res.status(500).json({ message: "Lỗi server", error });
+  }
+};
+
+const getLatestConfirmedBooking = async (req, res) => {
+  try {
+    const booking = await Booking.findOne({ status: "Confirmed" })
+      .sort({ updatedAt: -1 })
+      .populate("customerId", "fullName email phone")
+      .populate("garageId", "name address phone")
+      .lean();
+
+    if (!booking) {
+      return res.status(404).json({ message: "Không tìm thấy booking nào đã xác nhận" });
+    }
+
+    res.status(200).json({ booking });
+  } catch (error) {
+    console.error("Lỗi khi lấy booking gần nhất:", error);
+    res.status(500).json({ message: "Lỗi server", error });
+  }
 };
 
 const cancelBooking = async (req, res) => {
@@ -237,5 +266,7 @@ export {
     createBooking,
     updateBooking,
     getBookingDatesOfCustomer,
+    getConfirmedBookings,
+    getLatestConfirmedBooking,
     cancelBooking,
 };
