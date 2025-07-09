@@ -1,8 +1,19 @@
-const express = require("express")
-const router = express.Router()
-const scheduleController = require("~/controllers/scheduleController")
+import express from "express";
+import {
+    getScheduleByGarage,
+    updateSchedulesSlot,
 
-router.get("/:garageId", scheduleController.getScheduleByGarage)
-router.put("/update/:garageId", scheduleController.updateScheduleSlot)
+} from "../controllers/scheduleController.js";
 
-module.exports = router
+
+const router = express.Router();
+
+// 📌 Get schedule of a garage by date
+router.get("/:garageId", getScheduleByGarage);
+
+// 📌 Update slot of a garage
+router.put("/update/:garageId", updateSchedulesSlot);
+
+
+
+export default router;

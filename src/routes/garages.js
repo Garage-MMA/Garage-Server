@@ -1,17 +1,26 @@
-const express = require("express")
-const router = express.Router()
-const garageController = require("~/controllers/garageController")
+import express from "express";
+import {
+    getAllGarages,
+    getNearbyGarages,
+    createGarage,
+    updateGarage,
+    deleteGarage
+} from "../controllers/garageController.js";
 
-// Route lấy danh sách garage gần vị trí người dùng
-router.get("/", garageController.getNearbyGarages)
 
-// Route thêm mới garage
-router.post("/", garageController.createGarage)
+const router = express.Router();
 
-// Route cập nhật thông tin garage
-router.put("/:id", garageController.updateGarage)
+router.get("/all", getAllGarages);
+// 📌 Get nearby garages based on user's location
+router.get("/", getNearbyGarages);
 
-// Route xóa garage
-router.delete("/:id", garageController.deleteGarage)
+// 📌 Create new garage
+router.post("/", createGarage);
 
-module.exports = router
+// 📌 Update garage info
+router.put("/:id", updateGarage);
+
+// 📌 Delete a garage
+router.delete("/:id", deleteGarage);
+
+export default router;

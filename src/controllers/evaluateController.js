@@ -1,8 +1,8 @@
-const Evaluate = require("../models/evaluate");
-const { validationResult } = require("express-validator");
+import Evaluate from "../models/evaluate.js";
+import { validationResult } from "express-validator";
 
-// Tạo mới đánh giá
-exports.createEvaluate = async (req, res) => {
+// 📌 Create new evaluation
+export const createEvaluate = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({ errors: errors.array() });
@@ -15,15 +15,17 @@ exports.createEvaluate = async (req, res) => {
     const saved = await newEvaluate.save();
     res.status(201).json({
       message: "Evaluation created successfully",
-      data: saved
+      data: saved,
     });
   } catch (err) {
-    res.status(500).json({ message: "Failed to create evaluation", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Failed to create evaluation", error: err.message });
   }
 };
 
-// Lấy tất cả đánh giá (có phân trang & sắp xếp)
-exports.getAllEvaluates = async (req, res) => {
+// 📌 Get all evaluations (with pagination & sort)
+export const getAllEvaluates = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
 
@@ -39,9 +41,12 @@ exports.getAllEvaluates = async (req, res) => {
       total,
       page,
       limit,
-      data: evaluations
+      data: evaluations,
     });
   } catch (err) {
-    res.status(500).json({ message: "Failed to retrieve evaluations", error: err.message });
+    res.status(500).json({
+      message: "Failed to retrieve evaluations",
+      error: err.message,
+    });
   }
 };

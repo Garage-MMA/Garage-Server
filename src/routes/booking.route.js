@@ -4,6 +4,7 @@ import {
   getAllBookingsOfUser,
   createBooking,
   updateBooking,
+  getBookingDatesOfCustomer
 } from "../controllers/booking.controller.js";
 import { verifyToken, verifyRole } from "../middleware/auth.middleware.js";
 
@@ -14,6 +15,7 @@ bookingRouter.get("/", verifyToken, verifyRole(["admin", "garage_owner"]), getAl
 
 // Logged-in customer
 bookingRouter.get("/my", verifyToken, verifyRole(["customer"]), getAllBookingsOfUser);
+bookingRouter.get("/my/dates", verifyToken, verifyRole(["customer"]), getBookingDatesOfCustomer);
 
 // Customer creates booking
 bookingRouter.post("/", verifyToken, verifyRole(["customer"]), createBooking);

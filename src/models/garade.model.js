@@ -6,6 +6,7 @@ const GarageSchema = new mongoose.Schema(
     address: { type: String, required: true },
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true },
+
     services: { type: [String], default: [] },
     rating: { type: Number, default: 0 },
     phone: { type: String, required: true },
@@ -14,6 +15,7 @@ const GarageSchema = new mongoose.Schema(
   },
   { timestamps: true }
 )
+GarageSchema.index({ location: "2dsphere" });
 
-const Garage = mongoose.model("Garage", GarageSchema)
+const Garage = mongoose.models.Garage || mongoose.model("Garage", GarageSchema, "Exe.garages");
 export default Garage
