@@ -4,7 +4,8 @@ import {
     getNearbyGarages,
     createGarage,
     updateGarage,
-    deleteGarage
+    deleteGarage,
+    getGarageByOwnerId
 } from "../controllers/garageController.js";
 
 
@@ -22,5 +23,7 @@ router.put("/:id", updateGarage);
 
 // 📌 Delete a garage
 router.delete("/:id", deleteGarage);
+
+router.get("/by-owner/:ownerId", getGarageByOwnerId);
 
 export default router;

@@ -160,3 +160,19 @@ export const deleteGarage = async (req, res) => {
     res.status(500).json({ message: "Lỗi server." });
   }
 };
+/// theem
+export const getGarageByOwnerId = async (req, res) => {
+  try {
+    const ownerId = req.query.ownerId || req.params.ownerId;
+
+    if (!ownerId) return res.status(400).json({ message: "Missing ownerId" });
+
+    const garages = await Garage.getGarageByOwnerId(ownerId);
+
+    res.status(200).json({ garages });
+  } catch (error) {
+    console.error("");
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+///theem
