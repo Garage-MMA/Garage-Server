@@ -100,5 +100,46 @@ const login = async (req, res) => {
 };
 
 
+const editProfile = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { fullName, phone } = req.body;
 
-export default {register, login}
+    if (!fullName?.trim() || !phone?.trim()) {
+      return res.status(400).json({ message: "Full name and phone are required" });
+    }
+
+    if (fullName.trim().length < 2) {
+      return res.status(400).json({ message: "Full name must be at least 2 characters long" });
+    }
+
+    const phoneRegex = /^[0-9]{10,11}$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({ message: "Invalid phone number format" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.fullName = fullName.trim();
+    user.phone = phone.trim();
+    await user.save();
+
+    const { password: _, ...userWithoutPassword } = user.toObject();
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: userWithoutPassword
+    });
+
+  } catch (error) {
+    console.error("Edit profile error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+export default {register, login, editProfile}
