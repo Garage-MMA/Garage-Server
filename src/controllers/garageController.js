@@ -160,3 +160,22 @@ export const deleteGarage = async (req, res) => {
     res.status(500).json({ message: "Lỗi server." });
   }
 };
+
+export const searchGaragesByName = async (req, res) => {
+  try {
+    const { name } = req.query;
+
+    if (!name || typeof name !== 'string') {
+      return res.status(400).json({ message: "Thiếu tên hoặc tên không hợp lệ." });
+    }
+
+    const garages = await Garage.find({
+      name: { $regex: name, $options: "i" } 
+    });
+
+    res.status(200).json({ garages });
+  } catch (error) {
+    console.error("Lỗi khi tìm kiếm garage theo tên:", error);
+    res.status(500).json({ message: "Lỗi server." });
+  }
+};
