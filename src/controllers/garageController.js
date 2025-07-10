@@ -1,11 +1,13 @@
 import Garage from "../models/garade.model.js"; // ❗ Đường dẫn này phải đúng tên file model
+
+// 📌 Lấy toàn bộ danh sách garage
 export const getAllGarages = async (req, res) => {
   try {
     const garages = await Garage.find({});
     res.status(200).json({ garages });
   } catch (error) {
-    console.error("Lỗi khi lấy tất cả garage:", error);
-    res.status(500).json({ message: "Lỗi server." });
+    console.error("Error while fetching all garages:", error);
+    res.status(500).json({ message: "Server error." });
   }
 };
 
@@ -22,9 +24,8 @@ export const getNearbyGarages = async (req, res) => {
       isNaN(latitude) ||
       isNaN(longitude)
     ) {
-      return res.status(400).json({ message: "Vĩ độ và kinh độ không hợp lệ" });
+      return res.status(400).json({ message: "Invalid latitude or longitude." });
     }
-
 
     const nearbyGarages = await Garage.find({
       location: {
@@ -33,17 +34,15 @@ export const getNearbyGarages = async (req, res) => {
             type: "Point",
             coordinates: [longitude, latitude],
           },
-          $maxDistance: 20000,
+          $maxDistance: 20000, // 20 km
         },
       },
     });
 
-
-
     res.status(200).json({ garages: nearbyGarages });
   } catch (error) {
-    console.error("Lỗi khi lấy danh sách garage:", error);
-    res.status(500).json({ message: "Lỗi server." });
+    console.error("Error while fetching nearby garages:", error);
+    res.status(500).json({ message: "Server error." });
   }
 };
 
@@ -64,7 +63,7 @@ export const createGarage = async (req, res) => {
     } = req.body;
 
     if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
-      return res.status(400).json({ message: "Vĩ độ và kinh độ không hợp lệ." });
+      return res.status(400).json({ message: "Invalid latitude or longitude." });
     }
 
     const newGarage = new Garage({
@@ -84,12 +83,11 @@ export const createGarage = async (req, res) => {
       image,
     });
 
-
     await newGarage.save();
-    res.status(201).json({ message: "Thêm garage thành công!", garage: newGarage });
+    res.status(201).json({ message: "Garage created successfully!", garage: newGarage });
   } catch (error) {
-    console.error("Lỗi khi thêm garage:", error);
-    res.status(500).json({ message: "Lỗi server." });
+    console.error("Error while creating garage:", error);
+    res.status(500).json({ message: "Server error." });
   }
 };
 
@@ -133,13 +131,13 @@ export const updateGarage = async (req, res) => {
     });
 
     if (!updatedGarage) {
-      return res.status(404).json({ message: "Garage không tồn tại." });
+      return res.status(404).json({ message: "Garage not found." });
     }
 
-    res.status(200).json({ message: "Cập nhật garage thành công!", garage: updatedGarage });
+    res.status(200).json({ message: "Garage updated successfully!", garage: updatedGarage });
   } catch (error) {
-    console.error("Lỗi khi cập nhật garage:", error);
-    res.status(500).json({ message: "Lỗi server." });
+    console.error("Error while updating garage:", error);
+    res.status(500).json({ message: "Server error." });
   }
 };
 
@@ -151,12 +149,12 @@ export const deleteGarage = async (req, res) => {
     const deletedGarage = await Garage.findByIdAndDelete(id);
 
     if (!deletedGarage) {
-      return res.status(404).json({ message: "Garage không tồn tại." });
+      return res.status(404).json({ message: "Garage not found." });
     }
 
-    res.status(200).json({ message: "Xóa garage thành công!" });
+    res.status(200).json({ message: "Garage deleted successfully!" });
   } catch (error) {
-    console.error("Lỗi khi xóa garage:", error);
-    res.status(500).json({ message: "Lỗi server." });
+    console.error("Error while deleting garage:", error);
+    res.status(500).json({ message: "Server error." });
   }
 };
