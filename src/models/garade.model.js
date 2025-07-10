@@ -11,7 +11,8 @@ const GarageSchema = new mongoose.Schema(
     rating: { type: Number, default: 0 },
     phone: { type: String, required: true },
     openHours: { type: String, required: true },
-    image: { type: String, default: "" }
+    image: { type: String, default: "" },
+    owner: {type: String, default: ""}
   },
   { timestamps: true }
 )
