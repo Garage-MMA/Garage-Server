@@ -1,26 +1,45 @@
 import Evaluate from "../models/evaluate.js";
+import Booking from "../models/booking.model.js";
 import { validationResult } from "express-validator";
+import mongoose from "mongoose";
 
 // 📌 Create new evaluation
 export const createEvaluate = async (req, res) => {
+  console.log("📦 Received body:", req.body);
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({ errors: errors.array() });
   }
 
-  const { rating, comment } = req.body;
+  const { rating, comment, bookingId, customerId } = req.body;
+
+  if (!bookingId || !customerId) {
+    return res.status(400).json({ message: "Thiếu bookingId hoặc customerId" });
+  }
 
   try {
-    const newEvaluate = new Evaluate({ rating, comment });
+    const booking = await Booking.findById(bookingId);
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking không tồn tại" });
+    }
+
+    if (booking.status !== "Billed") {
+      return res.status(403).json({ message: "Chỉ có thể đánh giá khi booking đã được thanh toán" });
+    }
+
+    const newEvaluate = new Evaluate({ rating, comment, bookingId, customerId });
     const saved = await newEvaluate.save();
+
     res.status(201).json({
-      message: "Evaluation created successfully",
+      message: "Đánh giá đã được tạo thành công",
       data: saved,
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Failed to create evaluation", error: err.message });
+    res.status(500).json({
+      message: "Lỗi khi tạo đánh giá",
+      error: err.message,
+    });
   }
 };
 
@@ -46,6 +65,61 @@ export const getAllEvaluates = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       message: "Failed to retrieve evaluations",
+      error: err.message,
+    });
+  }
+};
+
+export const getEvaluatesByCustomer = async (req, res) => {
+  const { customerId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(customerId)) {
+    return res.status(400).json({ message: "customerId không hợp lệ" });
+  }
+
+  try {
+    const evaluations = await Evaluate.find({ customerId })
+      .sort({ createdAt: -1 })
+      .populate("bookingId");
+
+    res.status(200).json({
+      total: evaluations.length,
+      data: evaluations,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Lỗi khi lấy danh sách đánh giá theo customerId",
+      error: err.message,
+    });
+  }
+};
+
+export const updateEvaluate = async (req, res) => {
+  const { id } = req.params;
+  const { rating, comment } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "evaluateId không hợp lệ" });
+  }
+
+  try {
+    const updated = await Evaluate.findByIdAndUpdate(
+      id,
+      { rating, comment },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Evaluate không tồn tại" });
+    }
+
+    res.status(200).json({
+      message: "Cập nhật đánh giá thành công",
+      data: updated,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Lỗi khi cập nhật đánh giá",
       error: err.message,
     });
   }
