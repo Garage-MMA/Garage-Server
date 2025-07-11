@@ -5,7 +5,7 @@ import {
     createGarage,
     updateGarage,
     deleteGarage,
-    getGarageByOwnerId
+    getGarageByOwnerId,
     searchGaragesByName
 } from "../controllers/garageController.js";
 
