@@ -13,6 +13,16 @@ const evaluateSchema = new mongoose.Schema(
       maxlength: 300,
       default: "",
     },
+    bookingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Booking",
+      required: true,
+    },
+    customerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     date: {
       type: Date,
       default: Date.now,

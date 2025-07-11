@@ -166,7 +166,8 @@ export const deleteGarage = async (req, res) => {
     res.status(500).json({ message: "Lỗi server." });
   }
 };
-// theem
+
+/// theem
 export const getGarageByOwnerId = async (req, res) => {
   try {
     const ownerId = req.query.ownerId || req.params.ownerId;
@@ -182,6 +183,7 @@ export const getGarageByOwnerId = async (req, res) => {
   }
 };
 //theem
+///theem
 
 export const searchGaragesByName = async (req, res) => {
   try {
