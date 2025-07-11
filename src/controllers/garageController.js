@@ -1,4 +1,5 @@
-import Garage from "../models/garade.model.js"; // ❗ Đường dẫn này phải đúng tên file model
+import Garage from "../models/garade.model.js";
+
 export const getAllGarages = async (req, res) => {
   try {
     const garages = await Garage.find({});
@@ -51,7 +52,7 @@ export const getNearbyGarages = async (req, res) => {
 export const createGarage = async (req, res) => {
   try {
     const {
-      _id,
+      ownerId,
       name,
       address,
       latitude,
@@ -63,19 +64,25 @@ export const createGarage = async (req, res) => {
       image,
     } = req.body;
 
-    if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
-      return res.status(400).json({ message: "Vĩ độ và kinh độ không hợp lệ." });
+    if (!ownerId || !name || !address || !phone || !latitude || !longitude || !openHours) {
+      return res.status(400).json({ message: 'Vui lòng điền đầy đủ thông tin.' });
+    }
+
+    const lat = parseFloat(latitude);
+    const lng = parseFloat(longitude);
+    if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      return res.status(400).json({ message: 'Latitude phải từ -90 đến 90, longitude từ -180 đến 180.' });
     }
 
     const newGarage = new Garage({
-      _id,
+      ownerId,
       name,
       address,
-      latitude,
-      longitude,
+      latitude: lat,
+      longitude: lng,
       location: {
         type: "Point",
-        coordinates: [parseFloat(longitude), parseFloat(latitude)],
+        coordinates: [lng, lat],
       },
       services,
       rating,
@@ -83,7 +90,6 @@ export const createGarage = async (req, res) => {
       openHours,
       image,
     });
-
 
     await newGarage.save();
     res.status(201).json({ message: "Thêm garage thành công!", garage: newGarage });
@@ -160,7 +166,7 @@ export const deleteGarage = async (req, res) => {
     res.status(500).json({ message: "Lỗi server." });
   }
 };
-/// theem
+// theem
 export const getGarageByOwnerId = async (req, res) => {
   try {
     const ownerId = req.query.ownerId || req.params.ownerId;
@@ -175,7 +181,7 @@ export const getGarageByOwnerId = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
-///theem
+//theem
 
 export const searchGaragesByName = async (req, res) => {
   try {
