@@ -1,6 +1,6 @@
 import express from "express";
 import { check } from "express-validator";
-import { createEvaluate, getAllEvaluates,getEvaluatesByCustomer,updateEvaluate } from "../controllers/evaluateController.js";
+import { createEvaluate, getAllEvaluates,getEvaluatesByCustomer,updateEvaluate , getEvaluateByOwnerId } from "../controllers/evaluateController.js";
 
 const router = express.Router();
 
@@ -27,6 +27,8 @@ router.post(
 
 // 📌 Get all evaluations with pagination
 router.get("/", getAllEvaluates);
+
+router.get("/owner/:ownerId", getEvaluateByOwnerId);
 
 router.get("/:customerId", getEvaluatesByCustomer);
 

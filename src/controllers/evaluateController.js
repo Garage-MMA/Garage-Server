@@ -2,7 +2,8 @@ import Evaluate from "../models/evaluate.js";
 import Booking from "../models/booking.model.js";
 import { validationResult } from "express-validator";
 import mongoose from "mongoose";
-
+import {getBookingByOwnerId} from "./booking.controller.js"; 
+import Garage from "../models/garade.model.js";
 // 📌 Create new evaluation
 export const createEvaluate = async (req, res) => {
   console.log("📦 Received body:", req.body);
@@ -123,4 +124,24 @@ export const updateEvaluate = async (req, res) => {
       error: err.message,
     });
   }
+};
+export const getEvaluateByOwnerId = async (req, res) => {
+  const { ownerId } = req.params;
+  console.log(ownerId )
+    const garages = await Garage.find({ ownerId: ownerId });
+    const garageIds = garages.map(g => g._id);
+     console.log(garageIds )
+    if (garageIds.length === 0) {
+      return res.status(404).json({ message: "No garages found for this owner" });
+    }
+    // Tìm tất cả booking có garageId thuộc danh sách này
+    const bookings = await Booking.find({ garageId: { $in: garageIds } });
+      console.log(bookings )
+  const evaluations = await Evaluate.find({ bookingId: { $in: bookings } });
+  res.status(200).json(evaluations);
+};
+export const getEvaluateById = async (req, res) => {
+  const { id } = req.params;
+  const evaluation = await Evaluate.findById(id);
+  res.status(200).json(evaluation);
 };

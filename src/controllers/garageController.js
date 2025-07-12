@@ -131,6 +131,13 @@ export const updateGarage = async (req, res) => {
         filteredUpdate[key] = updateData[key];
       }
     }
+   if (updateData.imageBase64) {
+      const uploadResponse = await cloudinary.uploader.upload(
+        `data:image/jpeg;base64,${updateData.imageBase64}`,
+        { folder: 'garage_images' }
+      );
+      filteredUpdate.image = uploadResponse.secure_url;
+    }
 
     if (filteredUpdate.latitude && filteredUpdate.longitude) {
       filteredUpdate.location = {
