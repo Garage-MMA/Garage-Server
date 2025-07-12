@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 import Booking from "../models/booking.model.js";
 import User from "../models/users.model.js";
 import Garage from "../models/garade.model.js";
@@ -147,6 +147,7 @@ const updateBooking = async (req, res) => {
         const { id } = req.params
         const { status, cancelReason } = req.body
         const updateData = { status }
+        console.log(updateData)
         if (status === "Cancelled" && cancelReason) {
             updateData.cancelReason = cancelReason
         }
@@ -275,6 +276,26 @@ const cancelBooking = async (req, res) => {
     res.status(500).json({ message: 'Server error', error });
   }
 };
+const getBookingByOwnerId = async (req, res) => {
+  try {
+    const { owner_id } = req.params;
+    // Tìm tất cả garage của owner
+    const garages = await Garage.find({ ownerId: owner_id });
+    const garageIds = garages.map(g => g._id);
+    if (garageIds.length === 0) {
+      return res.status(404).json({ message: "No garages found for this owner" });
+    }
+    // Tìm tất cả booking có garageId thuộc danh sách này
+    const bookings = await Booking.find({ garageId: { $in: garageIds } });
+    if (!bookings || bookings.length === 0) {
+      return res.status(404).json({ message: "No bookings found for this owner's garages" });
+    }
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error("Error in getBookingByOwnerId:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
 
 export {
     getAllBookings,
@@ -285,4 +306,5 @@ export {
     getConfirmedBookings,
     getLatestConfirmedBooking,
     cancelBooking,
+    getBookingByOwnerId,
 };

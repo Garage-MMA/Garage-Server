@@ -1,4 +1,5 @@
 import Garage from "../models/garade.model.js";
+import cloudinary from '../config/cloudinary.js';
 
 export const getAllGarages = async (req, res) => {
   try {
@@ -60,11 +61,20 @@ export const createGarage = async (req, res) => {
       services,
       rating,
       phone,
-      openHours,
-      image,
+      imageBase64
     } = req.body;
 
-    if (!ownerId || !name || !address || !phone || !latitude || !longitude || !openHours) {
+    let image;
+    if (imageBase64) {
+      // Upload base64 image to Cloudinary
+      const uploadResponse = await cloudinary.uploader.upload(
+        `data:image/jpeg;base64,${imageBase64}`,
+        { folder: 'garage_images' }
+      );
+      image = uploadResponse.secure_url;
+    }
+
+    if (!ownerId || !name || !address || !phone || !latitude || !longitude ) {
       return res.status(400).json({ message: 'Vui lòng điền đầy đủ thông tin.' });
     }
 
@@ -87,15 +97,14 @@ export const createGarage = async (req, res) => {
       services,
       rating,
       phone,
-      openHours,
-      image,
+      image, // Lưu URL ảnh Cloudinary
     });
 
     await newGarage.save();
     res.status(201).json({ message: "Thêm garage thành công!", garage: newGarage });
   } catch (error) {
     console.error("Lỗi khi thêm garage:", error);
-    res.status(500).json({ message: "Lỗi server." });
+    res.status(500).json({ message: "Lỗi server.", error: error.message });
   }
 };
 
@@ -104,7 +113,6 @@ export const updateGarage = async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
-
     const allowedFields = [
       "name",
       "address",
@@ -122,6 +130,13 @@ export const updateGarage = async (req, res) => {
       if (updateData[key] !== undefined) {
         filteredUpdate[key] = updateData[key];
       }
+    }
+   if (updateData.imageBase64) {
+      const uploadResponse = await cloudinary.uploader.upload(
+        `data:image/jpeg;base64,${updateData.imageBase64}`,
+        { folder: 'garage_images' }
+      );
+      filteredUpdate.image = uploadResponse.secure_url;
     }
 
     if (filteredUpdate.latitude && filteredUpdate.longitude) {
