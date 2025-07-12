@@ -8,6 +8,7 @@ import {
   getConfirmedBookings,
   getLatestConfirmedBooking,
   cancelBooking,
+  getBookingByOwnerId,
 } from "../controllers/booking.controller.js";
 import { verifyToken, verifyRole } from "../middleware/auth.middleware.js";
 
@@ -15,6 +16,8 @@ const bookingRouter = express.Router();
 
 // Admin or garage owner
 bookingRouter.get("/", verifyToken, verifyRole(["admin", "garage_owner"]), getAllBookings);
+//get booking by owner id
+bookingRouter.get("/owner/:owner_id", verifyToken, verifyRole(["garage_owner"]), getBookingByOwnerId);
 
 // Logged-in customer
 bookingRouter.get("/my", verifyToken, verifyRole(["customer"]), getAllBookingsOfUser);
