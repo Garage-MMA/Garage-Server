@@ -1,63 +1,42 @@
 import mongoose from "mongoose";
-import Service from "../models/service.model.js";
+import Garage from "../models/garage.model.js";
 
 export const validateService = (isCreate) => async (req, res, next) => {
   try {
-    const { id } = req.params || {};
-    const { name, description, price, duration, category, status } = req.body;
+    const { garageId } = req.params;
+    const { index } = req.params || {}; // For update
+    const { name } = req.body;
+
+    if (typeof garageId !== "string" || !/^[0-9a-fA-F]{24}$/.test(garageId)) {
+      return res.status(400).json({ message: "ID garage không hợp lệ" });
+    }
+
+    const garage = await Garage.findOne({ _id: garageId }).select('services');
+    if (!garage) {
+      return res.status(404).json({ message: "Garage not found" });
+    }
 
     const errors = [];
 
-    // Validate ID for update
-    if (!isCreate && (!id || !mongoose.isValidObjectId(id))) {
-      return res.status(400).json({ message: "ID dịch vụ không hợp lệ" });
-    }
-
-    // Validate fields
-    if (name || (isCreate && !name)) {
-      if (typeof name !== "string" || name.trim().length < 2) {
-        errors.push("Tên dịch vụ phải là chuỗi và có ít nhất 2 ký tự");
-      }
-      // Check for duplicate name
-      const query = isCreate ? { name: name?.trim() } : { name: name?.trim(), _id: { $ne: id } };
-      if (name && (await Service.findOne(query))) {
-        errors.push("Tên dịch vụ đã tồn tại");
+    // Validate for update index
+    if (!isCreate) {
+      const idx = parseInt(index);
+      if (isNaN(idx) || idx < 0 || idx >= garage.services.length) {
+        return res.status(400).json({ message: "Index dịch vụ không hợp lệ" });
       }
     }
 
-    if (description || (isCreate && !description)) {
-      if (typeof description !== "string" || description.trim().length < 10) {
-        errors.push("Mô tả phải là chuỗi và có ít nhất 10 ký tự");
+    // Validate name
+    if (!name || typeof name !== "string" || name.trim().length < 2) {
+      errors.push("Tên dịch vụ phải là chuỗi và có ít nhất 2 ký tự");
+    } else {
+      const trimmedName = name.trim();
+      const duplicate = garage.services.some((s, i) => 
+        s.toLowerCase() === trimmedName.toLowerCase() && (isCreate || i !== parseInt(index))
+      );
+      if (duplicate) {
+        errors.push("Tên dịch vụ đã tồn tại trong garage này");
       }
-    }
-
-    if (price || (isCreate && !price)) {
-      if (typeof price !== "number" || price <= 0) {
-        errors.push("Giá phải là số dương");
-      }
-    }
-
-    if (duration || (isCreate && !duration)) {
-      if (typeof duration !== "number" || duration <= 0) {
-        errors.push("Thời gian phải là số dương");
-      }
-    }
-
-    if (category || (isCreate && !category)) {
-      if (!["Sửa chữa", "Bảo dưỡng"].includes(category)) {
-        errors.push("Danh mục phải là 'Sửa chữa' hoặc 'Bảo dưỡng'");
-      }
-    }
-
-    if (status) {
-      if (!["Hoạt động", "Ngừng hoạt động"].includes(status)) {
-        errors.push("Trạng thái phải là 'Hoạt động' hoặc 'Ngừng hoạt động'");
-      }
-    }
-
-    // For create, ensure all required fields are present
-    if (isCreate && (!name || !description || !price || !duration || !category)) {
-      errors.push("Thiếu thông tin bắt buộc");
     }
 
     if (errors.length > 0) {

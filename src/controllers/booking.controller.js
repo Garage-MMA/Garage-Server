@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import Booking from "../models/booking.model.js";
 import User from "../models/users.model.js";
-import Garage from "../models/garade.model.js";
+import Garage from "../models/garage.model.js";
 
 // Get all bookings (admin/garage_owner use)
 const getAllBookings = async (req, res) => {
