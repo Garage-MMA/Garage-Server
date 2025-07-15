@@ -9,7 +9,7 @@ const mainRouter = express.Router();
 mainRouter.use('/users', userRouter);
 mainRouter.use('/booking', bookingRouter);
 mainRouter.use('/bill', billRouter);
-mainRouter.use('/service', serviceRouter);
+mainRouter.use('/garages/:garageId/services', serviceRouter);
 mainRouter.use('/statistic', statisticRouter);
 mainRouter.use('/vehicle', vehicleRouter);
 

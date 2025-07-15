@@ -1,13 +1,12 @@
 import express from "express";
 import serviceController from "../controllers/service.controller.js";
 
-const serviceRouter = express.Router();
+const serviceRouter = express.Router({ mergeParams: true });
 
 serviceRouter.get("/", serviceController.getAllServices);
-serviceRouter.get("/:name", serviceController.getServiceByName);
-serviceRouter.get("/:category", serviceController.getServicesByCategory);
+serviceRouter.get("/search/:name", serviceController.getServiceByName);
 serviceRouter.post("/", serviceController.createService);
-serviceRouter.put("/:id", serviceController.updateService);
-serviceRouter.delete("/:id", serviceController.deleteService);
+serviceRouter.put("/:index", serviceController.updateService); // Change :id to :index
+serviceRouter.delete("/:index", serviceController.deleteService); // Change :id to :index
 
-export default serviceRouter
+export default serviceRouter;

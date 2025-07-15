@@ -1,12 +1,17 @@
-import Service from "../models/service.model.js";
+import Garage from "../models/garage.model.js";
 import { validateService } from "../middleware/validateService.js";
 
 const serviceController = {
   getAllServices: async (req, res) => {
     try {
-      const services = await Service.find().lean();
+      const { garageId } = req.params;
+      const garage = await Garage.findOne({ _id: garageId }).select('services').lean();
+      if (!garage) {
+        return res.status(404).json({ message: "Garage not found" });
+      }
+      const services = garage.services || [];
       if (!services.length) {
-        return res.status(404).json({ message: "No services found" });
+        return res.status(404).json({ message: "No services found in this garage" });
       }
       res.status(200).json(services);
     } catch (error) {
@@ -16,12 +21,15 @@ const serviceController = {
 
   getServiceByName: async (req, res) => {
     try {
-      const { name } = req.params;
+      const { garageId, name } = req.params;
+      const garage = await Garage.findOne({ _id: garageId }).select('services').lean();
+      if (!garage) {
+        return res.status(404).json({ message: "Garage not found" });
+      }
       const regex = new RegExp(name.trim(), "i");
-      const services = await Service.find({ name: { $regex: regex } }).lean();
-
+      const services = garage.services.filter(s => regex.test(s));
       if (!services.length) {
-        return res.status(404).json({ message: "No matching services found" });
+        return res.status(404).json({ message: "No matching services found in this garage" });
       }
       res.status(200).json(services);
     } catch (error) {
@@ -30,45 +38,33 @@ const serviceController = {
   },
 
   getServicesByCategory: async (req, res) => {
-    try {
-      const { category } = req.params;
-
-      if (!["Sửa chữa", "Bảo dưỡng"].includes(category)) {
-        return res.status(400).json({ message: "Category must be 'Sửa chữa' or 'Bảo dưỡng'" });
-      }
-
-      const services = await Service.find({ category }).lean();
-
-      if (!services.length) {
-        return res.status(404).json({ message: `No services found in category ${category}` });
-      }
-
-      res.status(200).json(services);
-    } catch (error) {
-      res.status(500).json({ message: "Error retrieving services by category", error: error.message });
-    }
+    // Bỏ chức năng này vì không có category nữa, hoặc redirect to error
+    res.status(400).json({ message: "Category not supported for simple services" });
   },
 
   createService: [
-    validateService(true), // true indicates creation (check for duplicate name)
+    validateService(true),
     async (req, res) => {
       try {
-        const { name, description, price, duration, category, status } = req.body;
+        const { garageId } = req.params;
+        const { name } = req.body;
 
-        const newService = new Service({
-          name: name.trim(),
-          description: description.trim(),
-          price,
-          duration,
-          category,
-          status: status || "Active",
-        });
+        const garage = await Garage.findOne({ _id: garageId });
+        if (!garage) {
+          return res.status(404).json({ message: "Garage not found" });
+        }
 
-        const savedService = await newService.save();
+        const trimmedName = name.trim();
+        if (garage.services.includes(trimmedName)) {
+          return res.status(400).json({ message: "Service name already exists" });
+        }
+
+        garage.services.push(trimmedName);
+        await garage.save();
 
         res.status(201).json({
           message: "Service created successfully",
-          data: savedService,
+          data: trimmedName,
         });
       } catch (error) {
         res.status(500).json({ message: "Error creating service", error: error.message });
@@ -77,33 +73,33 @@ const serviceController = {
   ],
 
   updateService: [
-    validateService(false), 
+    validateService(false),
     async (req, res) => {
       try {
-        const { id } = req.params;
-        const { name, description, price, duration, category, status } = req.body;
+        const { garageId, index } = req.params; // Use index instead of id
+        const { name } = req.body;
 
-        const updateData = {};
-        if (name) updateData.name = name.trim();
-        if (description) updateData.description = description.trim();
-        if (price) updateData.price = price;
-        if (duration) updateData.duration = duration;
-        if (category) updateData.category = category;
-        if (status) updateData.status = status;
+        const garage = await Garage.findOne({ _id: garageId });
+        if (!garage) {
+          return res.status(404).json({ message: "Garage not found" });
+        }
 
-        const updatedService = await Service.findByIdAndUpdate(
-          id,
-          { $set: updateData },
-          { new: true, runValidators: true }
-        ).lean();
-
-        if (!updatedService) {
+        const idx = parseInt(index);
+        if (isNaN(idx) || idx < 0 || idx >= garage.services.length) {
           return res.status(404).json({ message: "Service not found" });
         }
 
+        const trimmedName = name.trim();
+        if (garage.services.includes(trimmedName) && garage.services[idx] !== trimmedName) {
+          return res.status(400).json({ message: "Service name already exists" });
+        }
+
+        garage.services[idx] = trimmedName;
+        await garage.save();
+
         res.status(200).json({
           message: "Service updated successfully",
-          data: updatedService,
+          data: trimmedName,
         });
       } catch (error) {
         res.status(500).json({ message: "Error updating service", error: error.message });
@@ -113,17 +109,24 @@ const serviceController = {
 
   deleteService: async (req, res) => {
     try {
-      const { id } = req.params;
+      const { garageId, index } = req.params; // Use index instead of id
 
-      const deletedService = await Service.findByIdAndDelete(id);
+      const garage = await Garage.findOne({ _id: garageId });
+      if (!garage) {
+        return res.status(404).json({ message: "Garage not found" });
+      }
 
-      if (!deletedService) {
+      const idx = parseInt(index);
+      if (isNaN(idx) || idx < 0 || idx >= garage.services.length) {
         return res.status(404).json({ message: "Service not found for deletion" });
       }
 
+      garage.services.splice(idx, 1);
+      await garage.save();
+
       res.status(200).json({ message: "Service deleted successfully" });
     } catch (error) {
-      res.status(500).json({ message: "Error deleting service", error });
+      res.status(500).json({ message: "Error deleting service", error: error.message });
     }
   },
 };
